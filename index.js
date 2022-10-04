@@ -1,5 +1,25 @@
 require("dotenv").config();
 const TelegramApi = require("node-telegram-bot-api");
+const express = require("express");
+const cors = require("cors");
+
+// server express
+const PORT = 5000;
+
+const app = express();
+
+app.use(express.json());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
+
+/*app.post("/notification", (req, res) => {
+  console.log(req.body);
+  res.status(200).json("сервер работает");
+});*/
+// server express
 
 const { gameOptions, againOptions } = require("./options");
 
@@ -8,6 +28,15 @@ const token = process.env.token;
 const bot = new TelegramApi(token, { polling: true });
 
 const chats = {};
+
+app.post("/notification", (req, res) => {
+  console.log(req.body);
+  bot.sendMessage(
+    "459403393",
+    `С вами просят связаться \n${req.body.email}\n${req.body.full_name}\n${req.body.phone}`
+  );
+  res.status(200).json("сервер работает");
+});
 
 const startGame = async (chatId) => {
   await bot.sendMessage(
@@ -38,7 +67,7 @@ const start = () => {
   bot.on("message", async (msg) => {
     const text = msg.text;
     const chatId = msg.chat.id;
-    console.log(msg);
+    console.log(chatId);
 
     if (text === "/start") {
       await bot.sendSticker(
@@ -84,3 +113,4 @@ const start = () => {
 };
 
 start();
+app.listen(PORT, () => console.log("server started on port " + PORT));
